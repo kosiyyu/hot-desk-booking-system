@@ -1,5 +1,2 @@
-obj/
-bin/
-/.idea
-/API.sln.DotSettings.user
-*.info
+**/obj/
+**/bin/

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HotDeskWebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f20f3ffb15bf3cb7962ffda20e607eff5f283885")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5c8726efa8d305957dfa2d0068aa57a4e24c199d")]
 [assembly: System.Reflection.AssemblyProductAttribute("HotDeskWebApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HotDeskWebApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
