@@ -120,6 +120,21 @@ export default function Location() {
     return (
       <div className="">
         <div className="text-xl font-semibold mt-4">Desks</div>
+        <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400">
+            {location
+              ? selectedDeskId
+                ? `Desk ${
+                    location.desks.findIndex(
+                      (desk) => desk.deskId === selectedDeskId,
+                    ) + 1
+                  } of ${location.desks.length} selected`
+                : `${location.desks.length} ${
+                    location.desks.length === 1 ? 'desk' : 'desks'
+                  } available`
+              : 'No location data'}
+          </div>
+        </div>
         <div
           className={`flex flex-wrap ${
             isAdmin ? 'flex-col' : 'flex-row'
