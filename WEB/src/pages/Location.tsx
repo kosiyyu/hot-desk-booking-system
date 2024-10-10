@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button } from '../components/Button';
+import { isAdmin } from '../utils/auth';
+import Calendar from '../components/custom/Calendar';
 
 type Desk = {
   deskId: number;
@@ -38,6 +39,7 @@ export default function Location() {
         `http://localhost:5106/api/location/${id}/full`,
       );
       setLocation(response.data);
+      setSelectedDeskId(response.data.desks[0]?.deskId);
     } catch (error) {
       setError('Error fetching location data');
       console.error('Error fetching locations:', error);
@@ -52,17 +54,17 @@ export default function Location() {
         `http://localhost:5106/api/desk/${deskId}/availability/array/${month}`,
       );
       console.log(response.data);
-      setMonthCard(response.data); // Set availability data
-      setSelectedDeskId(deskId); // Track selected desk
+      setMonthCard(response.data);
+      setSelectedDeskId(deskId);
     } catch (error) {
       setError('Error fetching availability data');
       console.error('Error fetching availability:', error);
     }
   };
 
-  const handleMonthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMonth(event.target.value);
-    console.log(event.target.value);
+  const handleMonthChange = (newValue: string) => {
+    setMonth(newValue);
+    console.log(newValue);
   };
 
   useEffect(() => {
@@ -109,6 +111,110 @@ export default function Location() {
     return [...emptyDays, ...calendarDays];
   };
 
+  const areDesksAvailable = location && location.desks.length > 0;
+
+  const handleDelete = async (deskId: number) => {
+    try {
+      await axios.delete(`http://localhost:5106/api/desk/${deskId}`);
+    } catch (error) {
+      console.error('Error deleting desk:', error);
+    }
+  };
+
+  const handleEdit = async (deskId: number) => {
+    try {
+      await axios.put(`http://localhost:5106/api/desk/${deskId}`);
+    } catch (error) {
+      console.error('Error updating desk:', error);
+    }
+  };
+
+  const renderDesks = () => {
+    return (
+      <div className="">
+        <div
+          className={` flex flex-wrap ${
+            isAdmin ? 'flex-col' : 'flex-row'
+          } items-start justify-center`}
+        >
+          {location?.desks.map((desk) => (
+            <div
+              key={desk.deskId}
+              className={` ${
+                isAdmin ? 'flex flex-row items-center justify-center' : ''
+              }`}
+            >
+              <div
+                className={`border rounded-lg p-2 ${
+                  isAdmin ? '' : 'm-2'
+                } cursor-pointer`}
+                onClick={() => fetchMonthCard(desk.deskId)}
+              >
+                <div
+                  className={`text-center w-36 ${
+                    selectedDeskId === desk.deskId ? 'text-special' : ''
+                  }`}
+                >
+                  <div className="font-bold">{desk.name}</div>
+                  <div className="text-xs">ID: {desk.deskId}</div>
+                </div>
+              </div>
+              {isAdmin ? (
+                <>
+                  <div
+                    className="border p-4 rounded-lg my-2 mr-2 ml-4 text-red-500"
+                    onClick={() => handleDelete(desk.deskId)}
+                  >
+                    Delete
+                  </div>
+                  <div
+                    className="border p-4 rounded-lg my-2 ml-2 text-orange-500"
+                    onClick={() => handleEdit(desk.deskId)}
+                  >
+                    Rename
+                  </div>
+                </>
+              ) : (
+                ''
+              )}
+            </div>
+            //
+          ))}
+          {isAdmin ? (
+            <div className="p-2 mt-2 border rounded-lg text-center w-full text-green-500">
+              Add
+            </div>
+          ) : (
+            ''
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderNoDesksInfo = () => {
+    return <div className="text-center mt-4">No desks in this location.</div>;
+  };
+
+  const renderCalendarPageLegend = () => {
+    return (
+      <div className="mt-2 border rounded-lg">
+        <div className="flex flex-row items-center border-b py-2 pl-2">
+          <div className="bg-red-200 rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Unavailable</div>
+        </div>
+        <div className="flex flex-row items-center border-b py-2 pl-2">
+          <div className="bg-green-200 rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Available</div>
+        </div>
+        <div className="flex flex-row items-center py-2 pl-2">
+          <div className="border-2 border-special rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Reservation</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen p-4">
       {location ? (
@@ -121,33 +227,7 @@ export default function Location() {
                 ID: {location.locationId}
               </div>
             </div>
-
-            <div className="w-1/2">
-              <div className="flex items-center justify-center">
-                <input
-                  type="month"
-                  value={month}
-                  onChange={handleMonthChange}
-                  className="border border-gray-300 rounded-md p-2 mt-2 h-9"
-                />
-              </div>
-              <div className="flex flex-row flex-wrap items-center justify-center">
-                {location.desks.map((desk) => (
-                  <div key={desk.deskId} className="p-2">
-                    <Button onClick={() => fetchMonthCard(desk.deskId)}>
-                      <div
-                        className={`w-32 ${
-                          selectedDeskId === desk.deskId ? 'text-special' : ''
-                        }`}
-                      >
-                        <div className="font-bold">{desk.name}</div>
-                        <div className="text-xs">ID: {desk.deskId}</div>
-                      </div>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {renderDesks()}
           </div>
 
           {selectedDeskId && monthCard.length > 0 && (
@@ -157,7 +237,12 @@ export default function Location() {
                 {location.desks.find((x) => x.deskId == selectedDeskId)?.name}{' '}
                 (ID:{' '}
                 {location.desks.find((x) => x.deskId == selectedDeskId)?.deskId}
-                ) in {month}:
+                ) in{' '}
+                <Calendar
+                  value={month}
+                  onChange={handleMonthChange}
+                  className=""
+                />
               </h3>
               <div className="grid grid-cols-7 gap-4 mt-4">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
@@ -191,6 +276,8 @@ export default function Location() {
       ) : (
         <div>No location data available</div>
       )}
+      {areDesksAvailable && renderCalendarPageLegend()}
+      {!areDesksAvailable && renderNoDesksInfo()}
     </div>
   );
 }
