@@ -6,6 +6,7 @@ import Calendar from '../components/custom/Calendar';
 import { DeleteDeskModal } from '../components/custom/DeleteDeskModel';
 import { EditDeskModal } from '../components/custom/EditDeskModal';
 import { AddDeskModal } from '../components/custom/AddDeskModal';
+import ReservationModal from '../components/custom/ReservationModal';
 
 type Desk = {
   deskId: number;
@@ -32,9 +33,12 @@ export default function Location() {
   const [error, setError] = useState<string | null>(null);
   const [month, setMonth] = useState<string>(
     new Date().toISOString().slice(0, 7),
-  ); // "yyy-mm"
+  );
   const [monthCard, setMonthCard] = useState<DailyAvailability[]>([]);
   const [selectedDeskId, setSelectedDeskId] = useState<number | null>(null);
+  const [selectedReservationDate, setSelectedReservationDate] = useState<
+    string | null
+  >(null);
 
   const fetchLocation = async () => {
     try {
@@ -56,7 +60,6 @@ export default function Location() {
       const response = await axios.get<DailyAvailability[]>(
         `http://localhost:5106/api/desk/${deskId}/availability/array/${month}`,
       );
-      console.log(response.data);
       setMonthCard(response.data);
       setSelectedDeskId(deskId);
     } catch (error) {
@@ -67,7 +70,22 @@ export default function Location() {
 
   const handleMonthChange = (newValue: string) => {
     setMonth(newValue);
-    console.log(newValue);
+  };
+
+  const handleDayClick = (day: number, isAvailable: boolean) => {
+    if (isAvailable && selectedDeskId) {
+      const selectedDate = `${month}-${String(day).padStart(2, '0')}`;
+      setSelectedReservationDate(selectedDate);
+    }
+  };
+
+  const handleReservationSuccess = () => {
+    setSelectedReservationDate(null);
+    fetchMonthCard(selectedDeskId!);
+  };
+
+  const handleReservationClose = () => {
+    setSelectedReservationDate(null);
   };
 
   useEffect(() => {
@@ -183,7 +201,7 @@ export default function Location() {
             <AddDeskModal
               locationId={location?.locationId as number}
               onSuccess={fetchLocation}
-              userId={2} // dummy user id
+              userId={2}
             />
           )}
         </div>
@@ -256,8 +274,11 @@ export default function Location() {
                     <div
                       key={index}
                       className={`p-2 text-center rounded-md ${
-                        day.isAvailable ? 'bg-green-200' : 'bg-red-200'
+                        day.isAvailable
+                          ? 'bg-green-200 cursor-pointer'
+                          : 'bg-red-200'
                       }`}
+                      onClick={() => handleDayClick(day.day, day.isAvailable)}
                     >
                       {day.day}
                     </div>
@@ -277,6 +298,16 @@ export default function Location() {
       )}
       {areDesksAvailable && renderCalendarPageLegend()}
       {!areDesksAvailable && renderNoDesksInfo()}
+
+      {selectedReservationDate && selectedDeskId && (
+        <ReservationModal
+          userId={2}
+          deskId={selectedDeskId}
+          reservationDate={selectedReservationDate}
+          onSuccess={handleReservationSuccess}
+          onClose={handleReservationClose}
+        />
+      )}
     </div>
   );
 }
