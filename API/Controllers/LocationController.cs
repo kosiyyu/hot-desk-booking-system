@@ -73,8 +73,8 @@ public class LocationController : ControllerBase
         }
     }
     
-    [HttpGet("test/{id}")]
-    public async Task<IActionResult> Get2(int id)
+    [HttpGet("{id}/full")]
+    public async Task<IActionResult> GetFull(int id)
     {
         try
         {
@@ -85,5 +85,29 @@ public class LocationController : ControllerBase
         {
             return StatusCode(500);
         }
+    }
+    
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchLocations(string searchTerm = "", int page = 1, int pageSize = 10)
+    {
+        var (locations, totalCount) = await _locationService.SearchAsync(searchTerm, page, pageSize);
+
+        var result = new
+        {
+            Locations = locations,
+            TotalCount = totalCount,
+            CurrentPage = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+        };
+
+        return Ok(result);
+    }
+    
+    [HttpGet("count")]
+    public async Task<IActionResult> GetTotalLocationCount()
+    {
+        var count = await _locationService.CountAsync();
+        return Ok(count);
     }
 }

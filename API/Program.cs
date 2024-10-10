@@ -5,7 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure services
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<DatabaseContext>(
     options =>
     {
@@ -23,6 +32,7 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 
 var app = builder.Build();
 
+app.UseCors("AllowLocalhost");
 app.MapControllers();
 
 app.Run();

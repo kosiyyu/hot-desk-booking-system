@@ -1,6 +1,8 @@
 using HotDeskWebApp.Database;
 using HotDeskWebApp.Models;
+using HotDeskWebApp.Records;
 using HotDeskWebApp.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotDeskWebApp.Services;
@@ -75,17 +77,51 @@ public class LocationService : ILocationService
         
         return location;
     }
-    
-    public async Task<Location> FindByIdJoinAsync(int id)
+
+    public async Task<LocationOut> FindByIdJoinAsync(int id)
     {
         var location = await _ctx.Locations
             .Include(x => x.Desks)
-            .FirstAsync(l => l.LocationId == id);
-            
-        if (location == null) 
+            .FirstOrDefaultAsync(l => l.LocationId == id); // Use FirstOrDefaultAsync to return null if not found
+
+        if (location == null)
             throw new ArgumentException("Location not found");
 
-        return location;
+        return new LocationOut(
+            location.LocationId,
+            location.Name,
+            location.Address,
+            location.Desks.Select(d => new DeskOut(d.DeskId, d.Name, d.LocationId)).ToList());
+    }
+
+    
+    
+    public async Task<(List<Location> Locations, int TotalCount)> SearchAsync(string searchTerm, int page, int pageSize)
+    {
+        IQueryable<Location> query = _ctx.Locations;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchTerm = searchTerm.ToLower();
+            query = query.Where(l => 
+                l.Name.ToLower().Contains(searchTerm) || 
+                l.Address.ToLower().Contains(searchTerm));
+        }
+
+        int totalCount = await query.CountAsync();
+
+        var locations = await query
+            .OrderBy(l => l.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (locations, totalCount);
+    }
+    
+    public async Task<int> CountAsync()
+    {
+        return await _ctx.Locations.CountAsync();
     }
 
 }

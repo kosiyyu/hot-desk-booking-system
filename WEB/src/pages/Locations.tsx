@@ -1,6 +1,8 @@
-import { Search } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Search from '../components/custom/Search';
 import { Button } from '../components/Button';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 type Location = {
   locationId: number;
@@ -8,24 +10,55 @@ type Location = {
   address: string;
 };
 
+type SearchResponse = {
+  locations: Location[];
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+const ITEMS_PER_PAGE = 10;
+
 export default function Locations() {
   const [page, setPage] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
-  const [locations, setLocations] = useState<Array<Location>>([
-    { locationId: 1, name: 'Trading center', address: '123 Main St' },
-    {
-      locationId: 2,
-      name: 'University of Economics Seoul',
-      address: '456 Main St',
-    },
-    { locationId: 3, name: 'SFF', address: '789 Main St' },
-    { locationId: 4, name: 'Helli Tower', address: '101 Main St' },
-    { locationId: 5, name: 'Gooa', address: '112 Main St' },
-  ]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const searchLocations = () => {
-    console.log('searching locations');
-    // Implement actual search logic here
+  useEffect(() => {
+    fetchLocations();
+  }, [page, searchTerm]);
+
+  const fetchLocations = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get<SearchResponse>(
+        'http://localhost:5106/api/location/search',
+        {
+          params: {
+            searchTerm,
+            page,
+            pageSize: ITEMS_PER_PAGE,
+          },
+        },
+      );
+      setLocations(response.data.locations);
+      setTotalCount(response.data.totalCount);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchLocations();
   };
 
   const handlePrevPage = () => {
@@ -33,10 +66,10 @@ export default function Locations() {
   };
 
   const handleNextPage = () => {
-    setPage((prevPage) => prevPage + 1);
+    setPage((prevPage) => Math.min(prevPage + 1, totalPages));
   };
 
-  const handlePageNumberChange = (e) => {
+  const handlePageNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       setPageNumber(value);
@@ -44,50 +77,52 @@ export default function Locations() {
   };
 
   const handleGoToPage = () => {
-    setPage(pageNumber);
+    const newPage = Math.min(Math.max(1, pageNumber), totalPages);
+    setPage(newPage);
   };
 
   return (
     <div className="min-h-screen p-4">
-      <div className="flex justify-center items-center h-12 rounded-lg border focus-within:border-black mb-4">
-        <input
-          type="text"
-          placeholder="Search"
-          className="w-full mx-1 focus:outline-none pl-1"
-        />
-        <button onClick={searchLocations}>
-          <div>
-            <Search size={24} className="rounded-lg mx-2" />
-          </div>
-        </button>
-      </div>
-      <div className="mb-4 rounded-lg border">
-        {locations.map((location, index) => (
-          <div
-            key={location.locationId}
-            className={`p-2 ${
-              index !== locations.length - 1 ? 'border-b' : ''
-            }`}
-          >
-            <div className="font-bold">{location.name}</div>
-            <div className="text-xs text-gray-400">{location.address}</div>
-            <div className="text-xs text-gray-400">
-              ID: {location.locationId}
+      <Search
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        handleSearch={handleSearch}
+      />
+      {isLoading ? (
+        <div className="text-center">Loading...</div>
+      ) : (
+        <div className="mb-4 rounded-lg border">
+          {locations.map((location, index) => (
+            <div
+              key={location.locationId}
+              className={`p-2 ${
+                index !== locations.length - 1 ? 'border-b' : ''
+              }`}
+            >
+              <div className="font-bold">
+                <Link to={`location/${location.locationId}`}>
+                  {location.name}
+                </Link>
+              </div>
+              <div className="text-xs text-gray-400">{location.address}</div>
+              <div className="text-xs text-gray-400">
+                ID: {location.locationId}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <Button
           onClick={handlePrevPage}
-          disabled={page === 1}
+          disabled={page === 1 || isLoading}
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
         >
           <div className="mx-2">Previous</div>
         </Button>
 
-        <div className="flex items-center">
+        <div className="flex flex-col items-center">
           <Button
             stretchFull={true}
             className="px-4 py-2 bg-blue-500 text-white rounded"
@@ -104,10 +139,15 @@ export default function Locations() {
               </div>
             </div>
           </Button>
+          <div className="mt-2 text-gray-500 text-center text-xs">
+            Page {page} of {totalPages} | Total Locations: {totalCount}
+          </div>
         </div>
+
         <Button
           onClick={handleNextPage}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
+          disabled={page === totalPages || isLoading}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
         >
           <div className="mx-2">Next</div>
         </Button>

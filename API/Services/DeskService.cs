@@ -68,13 +68,15 @@ public class DeskService : IDeskService
         return !isReserved;
     }
     
-    public async Task<List<DailyAvailability>> DesksAvailableByMonth(DateOnly reservationDate)
+    public async Task<List<DailyAvailability>> DesksAvailableByMonth(DateOnly reservationDate, int id)
     {
         var startOfMonth = new DateOnly(reservationDate.Year, reservationDate.Month, 1);
         var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
-
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        
         var reservations = await _ctx.Reservations
-            .Where(r => 
+            .Where(r =>
+                r.DeskId == id &&
                 r.ReservationDate >= startOfMonth && 
                 r.ReservationDate <= endOfMonth)
             .Select(r => r.ReservationDate)
@@ -84,7 +86,7 @@ public class DeskService : IDeskService
 
         for (var date = startOfMonth; date <= endOfMonth; date = date.AddDays(1))
         {
-            var isAvailable = !reservations.Contains(date);
+            var isAvailable = date > today && !reservations.Contains(date);
             result.Add(new DailyAvailability(date, isAvailable));
         }
 

@@ -8,6 +8,9 @@ export default {
         sans: ['JBrainsMono', 'monospace'],
         JBrainsMono: ['JBrainsMono', 'monospace'],
       },
+      colors: {
+        special: '#0096FF',
+      },
       fontSize: {
         xs: '0.75rem',
         sm: '0.875rem',

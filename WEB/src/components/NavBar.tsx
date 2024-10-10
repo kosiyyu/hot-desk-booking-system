@@ -12,7 +12,9 @@ export function NavBar() {
       <div className="flex justify-end w-[33.33%]">
         <div className="flex justify-center items-center pr-2">
           <Link to="/login">
-            <Button stretchFull={true}>Login</Button>
+            <Button stretchFull={true}>
+              <div className="mx-2">Login</div>
+            </Button>
           </Link>
         </div>
       </div>
