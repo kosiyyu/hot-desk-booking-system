@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { isAdmin } from '../utils/auth';
 import Calendar from '../components/custom/Calendar';
+import { DeleteDeskModal } from '../components/custom/DeleteDeskModel';
+import { EditDeskModal } from '../components/custom/EditDeskModal';
+import { AddDeskModal } from '../components/custom/AddDeskModal';
 
 type Desk = {
   deskId: number;
@@ -113,34 +116,19 @@ export default function Location() {
 
   const areDesksAvailable = location && location.desks.length > 0;
 
-  const handleDelete = async (deskId: number) => {
-    try {
-      await axios.delete(`http://localhost:5106/api/desk/${deskId}`);
-    } catch (error) {
-      console.error('Error deleting desk:', error);
-    }
-  };
-
-  const handleEdit = async (deskId: number) => {
-    try {
-      await axios.put(`http://localhost:5106/api/desk/${deskId}`);
-    } catch (error) {
-      console.error('Error updating desk:', error);
-    }
-  };
-
   const renderDesks = () => {
     return (
       <div className="">
+        <div className="text-xl font-semibold mt-4">Desks</div>
         <div
-          className={` flex flex-wrap ${
+          className={`flex flex-wrap ${
             isAdmin ? 'flex-col' : 'flex-row'
           } items-start justify-center`}
         >
           {location?.desks.map((desk) => (
             <div
               key={desk.deskId}
-              className={` ${
+              className={`${
                 isAdmin ? 'flex flex-row items-center justify-center' : ''
               }`}
             >
@@ -159,33 +147,29 @@ export default function Location() {
                   <div className="text-xs">ID: {desk.deskId}</div>
                 </div>
               </div>
-              {isAdmin ? (
+              {isAdmin && (
                 <>
-                  <div
-                    className="border p-4 rounded-lg my-2 mr-2 ml-4 text-red-500"
-                    onClick={() => handleDelete(desk.deskId)}
-                  >
-                    Delete
-                  </div>
-                  <div
-                    className="border p-4 rounded-lg my-2 ml-2 text-orange-500"
-                    onClick={() => handleEdit(desk.deskId)}
-                  >
-                    Rename
-                  </div>
+                  <DeleteDeskModal
+                    deskId={desk.deskId}
+                    deskName={desk.name}
+                    onSuccess={fetchLocation}
+                  />
+                  <EditDeskModal
+                    deskId={desk.deskId}
+                    deskName={desk.name}
+                    onSuccess={fetchLocation}
+                  />
                 </>
-              ) : (
-                ''
               )}
             </div>
-            //
           ))}
-          {isAdmin ? (
-            <div className="p-2 mt-2 border rounded-lg text-center w-full text-green-500">
-              Add
-            </div>
-          ) : (
-            ''
+
+          {isAdmin && (
+            <AddDeskModal
+              locationId={location?.locationId as number}
+              onSuccess={fetchLocation}
+              userId={2} // dummy user id
+            />
           )}
         </div>
       </div>
@@ -244,7 +228,7 @@ export default function Location() {
                   className=""
                 />
               </h3>
-              <div className="grid grid-cols-7 gap-4 mt-4">
+              <div className="grid grid-cols-7 gap-4 mt-2 border rounded-lg p-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
                   (dayName) => (
                     <div key={dayName} className="font-bold text-center">
