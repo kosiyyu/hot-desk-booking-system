@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<DatabaseContext>(
     options =>
     {
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).LogTo(Console.WriteLine, LogLevel.Information);
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
         // options.UseLazyLoadingProxies();
     }
 );
