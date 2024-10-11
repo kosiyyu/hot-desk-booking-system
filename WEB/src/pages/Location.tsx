@@ -9,6 +9,7 @@ import DeskList from '../components/custom/DeskList';
 import AvailabilityCalendar from '../components/custom/AvailabilityCalendar';
 import CalendarLegend from '../components/custom/CalendarLegend';
 import LocationInfo from '../components/custom/LocationInfo';
+import api from '../utils/ api';
 
 type Desk = {
   deskId: number;
@@ -59,9 +60,7 @@ export default function Location() {
 
   const fetchLocation = async () => {
     try {
-      const response = await axios.get<LocationType>(
-        `http://localhost:5106/api/location/${id}/full`,
-      );
+      const response = await api.get<LocationType>(`/location/${id}/full`);
       setLocation(response.data);
       setSelectedDeskId(response.data.desks[0]?.deskId);
     } catch (error) {
@@ -74,11 +73,9 @@ export default function Location() {
 
   const fetchMonthCard = async (deskId: number) => {
     try {
-      const response = await axios.get<
+      const response = await api.get<
         { date: string; status: number; reservationId?: number }[]
-      >(
-        `http://localhost:5106/api/desk/${deskId}/availability/array/${month}/${userId}`,
-      );
+      >(`/desk/${deskId}/availability/array/${month}/${userId}`);
       const mappedData: DailyAvailability[] = response.data.map((item) => ({
         date: item.date,
         status: item.status as AvailabilityStatus,

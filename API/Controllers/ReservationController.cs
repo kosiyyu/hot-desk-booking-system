@@ -1,11 +1,14 @@
 using HotDeskWebApp.Models;
 using HotDeskWebApp.Repositories;
+using HotDeskWebApp.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotDeskWebApp.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ReservationController : ControllerBase
 {
     private readonly IReservationService _reservationService;

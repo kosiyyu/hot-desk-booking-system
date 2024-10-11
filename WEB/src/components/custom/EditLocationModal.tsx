@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../fuctional/Modal';
 import axios from 'axios';
+import api from '../../utils/ api';
 
 interface EditLocationModalProps {
   locationId: number;
@@ -21,7 +22,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
   const handleEdit = async () => {
     console.log('locationId:', locationId);
     try {
-      await axios.put(`http://localhost:5106/api/location/${locationId}`, {
+      await api.put(`/location/${locationId}`, {
         name: newName,
         address: newAddress,
       });

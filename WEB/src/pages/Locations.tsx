@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { AddLocationModal } from '../components/custom/AddLocationModal';
 import { isAdmin } from '../utils/auth';
 import { EditLocationModal } from '../components/custom/EditLocationModal';
+import api from '../utils/ api';
 
 type Location = {
   locationId: number;
@@ -42,16 +43,13 @@ export default function Locations() {
   const fetchLocations = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get<SearchResponse>(
-        'http://localhost:5106/api/location/search',
-        {
-          params: {
-            searchTerm,
-            page,
-            pageSize: ITEMS_PER_PAGE,
-          },
+      const response = await api.get<SearchResponse>('/location/search', {
+        params: {
+          searchTerm,
+          page,
+          pageSize: ITEMS_PER_PAGE,
         },
-      );
+      });
       setLocations(response.data.locations);
       setTotalCount(response.data.totalCount);
       setTotalPages(response.data.totalPages);
@@ -85,7 +83,7 @@ export default function Locations() {
 
   const handleRemoveLocation = async (locationId: number) => {
     try {
-      await axios.delete(`http://localhost:5106/api/location/${locationId}`);
+      await api.delete(`/location/${locationId}`);
 
       fetchLocations();
       setErrorMessage(null);

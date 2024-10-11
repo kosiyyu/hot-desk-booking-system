@@ -1,12 +1,14 @@
 using HotDeskWebApp.Models;
 using HotDeskWebApp.Repositories;
-using HotDeskWebApp.Services;
+using HotDeskWebApp.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotDeskWebApp.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class LocationController : ControllerBase
 {
     private readonly ILocationService _locationService;
@@ -17,6 +19,7 @@ public class LocationController : ControllerBase
     }
     
     [HttpPost]
+    [Admin]
     public async Task<IActionResult> Create([FromBody]LocationDTO locationDto)
     {
         try
@@ -32,6 +35,7 @@ public class LocationController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Admin]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -46,6 +50,7 @@ public class LocationController : ControllerBase
     }
     
     [HttpPut("{id}")]
+    [Admin]
     public async Task<IActionResult> Put([FromBody]LocationDTO locationDto, int id)
     {
         try
@@ -76,17 +81,25 @@ public class LocationController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> SearchLocations(string searchTerm = "", int page = 1, int pageSize = 10)
     {
-        var (locations, totalCount) = await _locationService.SearchAsync(searchTerm, page, pageSize);
-
-        var result = new
+        try
         {
-            Locations = locations,
-            TotalCount = totalCount,
-            CurrentPage = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
-        };
+            var (locations, totalCount) = await _locationService.SearchAsync(searchTerm, page, pageSize);
 
-        return Ok(result);
+            var result = new
+            {
+                Locations = locations,
+                TotalCount = totalCount,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            // Log the exception
+            return StatusCode(500, "An error occurred while processing your request.");
+        }
     }
 }

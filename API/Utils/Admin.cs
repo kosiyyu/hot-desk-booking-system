@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace HotDeskWebApp.Utils;
 
-public class AdminAttribute : AuthorizeAttribute
+public class Admin : AuthorizeAttribute
 {
-    public AdminAttribute()
+    public Admin()
     {
         Roles = "Admin";
     }

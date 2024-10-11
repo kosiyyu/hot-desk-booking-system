@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../fuctional/Modal';
 import axios from 'axios';
+import api from '../../utils/ api';
 
 interface DeskModalProps {
   deskId: number;
@@ -20,7 +21,7 @@ export const EditDeskModal: React.FC<DeskModalProps> = ({
   const handleEdit = async () => {
     try {
       console.log('deskId:', deskId);
-      await axios.put(`http://localhost:5106/api/desk/${deskId}`, {
+      await api.put(`/desk/${deskId}`, {
         name: newName,
         locationId: locationId,
       });

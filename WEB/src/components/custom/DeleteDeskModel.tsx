@@ -1,6 +1,7 @@
 import React from 'react';
 import Modal from '../fuctional/Modal';
 import axios from 'axios';
+import api from '../../utils/ api';
 
 interface DeskModalProps {
   deskId: number;
@@ -15,7 +16,7 @@ export const DeleteDeskModal: React.FC<DeskModalProps> = ({
 }) => {
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5106/api/desk/${deskId}`);
+      await api.delete(`/desk/${deskId}`);
       onSuccess();
     } catch (error) {
       console.error('Error deleting desk:', error);

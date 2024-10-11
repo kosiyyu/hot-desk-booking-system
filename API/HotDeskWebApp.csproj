@@ -24,4 +24,11 @@
       <Folder Include="Migrations\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="ApiTest\obj\ApiTest.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="ApiTest\obj\Debug\net8.0\ApiTest.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="ApiTest\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="ApiTest\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>

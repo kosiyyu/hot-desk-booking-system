@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Modal from '../fuctional/Modal';
 import { useState } from 'react';
+import api from '../../utils/ api';
 
 interface AddDeskModalProps {
   locationId: number;
@@ -16,7 +17,7 @@ export const AddDeskModal: React.FC<AddDeskModalProps> = ({
   const handleAdd = async () => {
     try {
       console.log('locationId:', locationId);
-      await axios.post(`http://localhost:5106/api/desk`, {
+      await api.post(`/desk`, {
         Name: newDeskName,
         LocationId: locationId,
       });

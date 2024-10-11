@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import api from '../../utils/ api';
 
 interface DeleteReservationModalProps {
   userId: number;
@@ -25,9 +26,7 @@ const DeleteReservationModal: React.FC<DeleteReservationModalProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      await axios.delete(
-        `http://localhost:5106/api/reservation/${reservationId}/${userId}`,
-      );
+      await api.delete(`/reservation/${reservationId}/${userId}`);
       onSuccess();
     } catch (error: any) {
       console.error('Error deleting reservation:', error);

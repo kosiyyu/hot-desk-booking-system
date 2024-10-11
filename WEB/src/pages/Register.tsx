@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import axios from 'axios';
+import api from '../utils/ api';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -14,7 +15,7 @@ const Register: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         'http://localhost:5106/api/user/register',
         {
           username,

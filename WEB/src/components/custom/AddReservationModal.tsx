@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../../utils/ api';
 
 interface AddReservationModalProps {
   userId: number;
@@ -28,14 +29,11 @@ const AddReservationModal: React.FC<AddReservationModalProps> = ({
     setError(null);
     try {
       console.log('Making reservation with userId:', userId, 'deskId:', deskId);
-      const response = await axios.post(
-        'http://localhost:5106/api/reservation',
-        {
-          userId,
-          deskId,
-          reservationDate,
-        },
-      );
+      const response = await api.post('/reservation', {
+        userId,
+        deskId,
+        reservationDate,
+      });
       console.log('Reservation response:', response.data);
       onSuccess();
       onClose();

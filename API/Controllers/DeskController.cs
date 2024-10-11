@@ -7,6 +7,7 @@ namespace HotDeskWebApp.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class DeskController : ControllerBase
 {
     private readonly IDeskService _deskService;
@@ -17,6 +18,7 @@ public class DeskController : ControllerBase
     }
     
     [HttpPost]
+    [Admin]
     public async Task<IActionResult> Post([FromBody] DeskDTO deskDto)
     {
         try
@@ -31,6 +33,7 @@ public class DeskController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Admin]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -45,6 +48,7 @@ public class DeskController : ControllerBase
     }
     
     [HttpPut("{id}")]
+    [Admin]
     public async Task<IActionResult> Put(DeskDTO deskDto, int id)
     {
         try
@@ -52,7 +56,6 @@ public class DeskController : ControllerBase
             await _deskService.EditAsync(deskDto, id);
             return NoContent();
         }
-        
         catch (Exception e)
         {
             return StatusCode(500);
@@ -66,7 +69,6 @@ public class DeskController : ControllerBase
         {
             var date = DateOnly.Parse(dateOnlyString);
             var array = await _deskService.DesksAvailableByMonth(date, deskId, userId);
-
             return Ok(array);
         }
         catch (Exception e)

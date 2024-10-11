@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Modal from '../fuctional/Modal';
+import api from '../../utils/ api';
 
 interface AddLocationModalProps {
   onSuccess: () => void;
@@ -14,7 +15,7 @@ export const AddLocationModal: React.FC<AddLocationModalProps> = ({
 
   const handleAdd = async () => {
     try {
-      await axios.post('http://localhost:5106/api/location', {
+      await api.post('/location', {
         name,
         address,
       });
