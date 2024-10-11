@@ -43,12 +43,16 @@ export function NavBar() {
           <>
             {location.pathname !== '/register' && (
               <Link to="/register">
-                <Button>Register</Button>
+                <Button>
+                  <div className="px-2">Register</div>
+                </Button>
               </Link>
             )}
             {location.pathname !== '/login' && (
               <Link to="/login">
-                <Button>Login</Button>
+                <Button>
+                  <div className="px-2">Login</div>
+                </Button>
               </Link>
             )}
           </>
