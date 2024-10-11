@@ -34,7 +34,7 @@ public class ReservationService : IReservationService
                     x.ReservationDate == reservationDto.ReservationDate);
             if (isReservationUnavailable) throw new InvalidOperationException("Desk is already reserved for this date");
             
-            if (await WouldExceedSevenConsecutiveDays(reservationDto.UserId, reservationDto.ReservationDate))
+            if (await WouldExceedSevenConsecutiveDays(reservationDto.UserId, reservationDto.DeskId, reservationDto.ReservationDate))
                 throw new InvalidOperationException("This reservation would result in more than 7 consecutive days of reservations");
 
             var reservation = new Reservation
@@ -119,7 +119,7 @@ public class ReservationService : IReservationService
                 throw new ArgumentException("Reservation date must be in the future");
             
             // Check if the edit would result in more than 7 consecutive days of reservations
-            if (await WouldExceedSevenConsecutiveDays(reservationDto.UserId, reservationDto.ReservationDate, id))
+            if (await WouldExceedSevenConsecutiveDays(reservationDto.UserId, reservationDto.DeskId, reservationDto.ReservationDate, id))
                 throw new InvalidOperationException("This change would result in more than 7 consecutive days of reservations");
 
             reservation.ReservationDate = reservationDto.ReservationDate;
@@ -137,7 +137,7 @@ public class ReservationService : IReservationService
         }
     }
 
-    private async Task<bool> WouldExceedSevenConsecutiveDays(int userId, DateOnly newReservationDate, int? excludeReservationId = null)
+    private async Task<bool> WouldExceedSevenConsecutiveDays(int userId, int deskId, DateOnly newReservationDate, int? excludeReservationId = null)
     {
         // Fetch all reservations for the user (14 days)
         var startDate = newReservationDate.AddDays(-14);
@@ -145,6 +145,7 @@ public class ReservationService : IReservationService
 
         var reservations = await _ctx.Reservations
             .Where(r => r.UserId == userId &&
+                        r.DeskId == deskId &&
                         r.ReservationDate >= startDate &&
                         r.ReservationDate <= endDate &&
                         (excludeReservationId == null || r.ReservationId != excludeReservationId))

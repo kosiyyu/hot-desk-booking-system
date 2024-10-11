@@ -5,20 +5,24 @@ import axios from 'axios';
 interface DeskModalProps {
   deskId: number;
   deskName: string;
+  locationId: number;
   onSuccess: () => void;
 }
 
 export const EditDeskModal: React.FC<DeskModalProps> = ({
   deskId,
   deskName,
+  locationId,
   onSuccess,
 }) => {
   const [newName, setNewName] = useState(deskName);
 
   const handleEdit = async () => {
     try {
+      console.log('deskId:', deskId);
       await axios.put(`http://localhost:5106/api/desk/${deskId}`, {
         name: newName,
+        locationId: locationId,
       });
       onSuccess();
     } catch (error) {

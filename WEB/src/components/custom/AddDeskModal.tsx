@@ -5,22 +5,20 @@ import { useState } from 'react';
 interface AddDeskModalProps {
   locationId: number;
   onSuccess: () => void;
-  userId: number;
 }
 
 export const AddDeskModal: React.FC<AddDeskModalProps> = ({
   locationId,
   onSuccess,
-  userId = 2,
 }) => {
   const [newDeskName, setNewDeskName] = useState('');
 
   const handleAdd = async () => {
     try {
+      console.log('locationId:', locationId);
       await axios.post(`http://localhost:5106/api/desk`, {
-        name: newDeskName,
-        locationId: locationId,
-        userId: userId,
+        Name: newDeskName,
+        LocationId: locationId,
       });
       setNewDeskName(''); // Reset input
       onSuccess();

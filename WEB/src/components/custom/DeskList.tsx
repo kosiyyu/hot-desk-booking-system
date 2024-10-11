@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { DeleteDeskModal } from './DeleteDeskModel';
 import { EditDeskModal } from './EditDeskModal';
 import { AddDeskModal } from './AddDeskModal';
@@ -23,68 +24,73 @@ const DeskList: React.FC<DeskListProps> = ({
   isAdmin,
   onDeskSelect,
   onLocationRefresh,
-}) => (
-  <div className="">
-    <div className="text-xl font-semibold mt-4">Desks</div>
-    <div className="text-sm text-gray-400">
-      {selectedDeskId
-        ? `Desk ${
-            desks.findIndex((desk) => desk.deskId === selectedDeskId) + 1
-          } of ${desks.length} selected`
-        : `${desks.length} ${desks.length === 1 ? 'desk' : 'desks'} available`}
-    </div>
-    <div
-      className={`flex flex-wrap ${
-        isAdmin ? 'flex-col' : 'flex-row'
-      } items-start justify-center`}
-    >
-      {desks.map((desk) => (
-        <div
-          key={desk.deskId}
-          className={`${
-            isAdmin ? 'flex flex-row items-center justify-center' : ''
-          }`}
-        >
+}) => {
+  const { id } = useParams<{ id: string }>();
+  const locationId = Number(id);
+  console.log(locationId);
+
+  return (
+    <div className="">
+      <div className="text-xl font-semibold mt-4">Desks</div>
+      <div className="text-sm text-gray-400">
+        {selectedDeskId
+          ? `Desk ${
+              desks.findIndex((desk) => desk.deskId === selectedDeskId) + 1
+            } of ${desks.length} selected`
+          : `${desks.length} ${
+              desks.length === 1 ? 'desk' : 'desks'
+            } available`}
+      </div>
+      <div
+        className={`flex flex-wrap ${
+          isAdmin ? 'flex-col' : 'flex-row'
+        } items-start justify-center`}
+      >
+        {desks.map((desk) => (
           <div
-            className={`border rounded-lg p-2 ${
-              isAdmin ? '' : 'm-2'
-            } cursor-pointer`}
-            onClick={() => onDeskSelect(desk.deskId)}
+            key={desk.deskId}
+            className={`${
+              isAdmin ? 'flex flex-row items-center justify-center' : ''
+            }`}
           >
             <div
-              className={`text-center w-36 ${
-                selectedDeskId === desk.deskId ? 'text-special' : ''
-              }`}
+              className={`border rounded-lg p-2 ${
+                isAdmin ? '' : 'm-2'
+              } cursor-pointer`}
+              onClick={() => onDeskSelect(desk.deskId)}
             >
-              <div className="font-bold">{desk.name}</div>
-              <div className="text-xs">ID: {desk.deskId}</div>
+              <div
+                className={`text-center w-36 ${
+                  selectedDeskId === desk.deskId ? 'text-special' : ''
+                }`}
+              >
+                <div className="font-bold">{desk.name}</div>
+                <div className="text-xs">ID: {desk.deskId}</div>
+              </div>
             </div>
+            {isAdmin && (
+              <div className="flex flex-row items-center justify-end w-full">
+                <DeleteDeskModal
+                  deskId={desk.deskId}
+                  deskName={desk.name}
+                  onSuccess={onLocationRefresh}
+                />
+                <EditDeskModal
+                  deskId={desk.deskId}
+                  deskName={desk.name}
+                  locationId={locationId}
+                  onSuccess={onLocationRefresh}
+                />
+              </div>
+            )}
           </div>
-          {isAdmin && (
-            <div className="flex flex-row items-center justify-end w-full">
-              <DeleteDeskModal
-                deskId={desk.deskId}
-                deskName={desk.name}
-                onSuccess={onLocationRefresh}
-              />
-              <EditDeskModal
-                deskId={desk.deskId}
-                deskName={desk.name}
-                onSuccess={onLocationRefresh}
-              />
-            </div>
-          )}
-        </div>
-      ))}
-      {isAdmin && (
-        <AddDeskModal
-          locationId={desks[0]?.locationId}
-          onSuccess={onLocationRefresh}
-          userId={2}
-        />
-      )}
+        ))}
+        {isAdmin && (
+          <AddDeskModal locationId={locationId} onSuccess={onLocationRefresh} />
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default DeskList;

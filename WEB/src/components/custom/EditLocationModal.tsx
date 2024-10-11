@@ -19,6 +19,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
   const [newAddress, setNewAddress] = useState(address);
 
   const handleEdit = async () => {
+    console.log('locationId:', locationId);
     try {
       await axios.put(`http://localhost:5106/api/location/${locationId}`, {
         name: newName,
