@@ -58,5 +58,19 @@ namespace HotDeskWebApp.Controllers
                 return StatusCode(500);
             }
         }
+        
+        [HttpPost("validate")]
+        public async Task<IActionResult> ValidateUser([FromBody] UserDTO userDto)
+        {
+            try
+            {
+                var jwt = await _userService.ValidateUserAsync(userDto);
+                return Ok(jwt);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+        }
     }
 }

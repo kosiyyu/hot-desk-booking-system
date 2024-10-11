@@ -7,5 +7,6 @@ namespace HotDeskWebApp.Repositories
         public Task AddAsync(UserDTO userDto, bool isAdmin = false);
         public Task RemoveAsync(int id);
         public Task<User> FindById(int id);
+        public Task<string> ValidateUserAsync(UserDTO userDto);
     }
 }

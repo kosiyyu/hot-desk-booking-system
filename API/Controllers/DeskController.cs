@@ -1,4 +1,6 @@
 using HotDeskWebApp.Models;
+using HotDeskWebApp.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotDeskWebApp.Controllers;
@@ -73,6 +75,7 @@ public class DeskController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("{id}/availability/date/{dateOnlyString}")]
     public async Task<IActionResult> IsAvailable(int id, string dateOnlyString)
     {

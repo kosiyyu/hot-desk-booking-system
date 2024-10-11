@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { isAdmin } from '../utils/auth';
@@ -133,7 +133,7 @@ export default function Location() {
             <DeskList
               desks={location.desks}
               selectedDeskId={selectedDeskId}
-              isAdmin={isAdmin}
+              isAdmin={isAdmin()}
               onDeskSelect={fetchMonthCard}
               onLocationRefresh={fetchLocation}
             />
