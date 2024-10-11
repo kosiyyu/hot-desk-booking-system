@@ -1,0 +1,67 @@
+version: '3.8'
+
+name: hdbs_example
+
+services:
+  postgres:
+    image: postgres:15.4
+    container_name: postgres_example
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  aspnetcore_app:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    container_name: hot_desk_booking_api
+    restart: always
+    ports:
+      - '5106:5106'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=dev_db;Username=dev_user;Password=dev_password
+      - Jwt__Key=X3R+lh95wJtPWS4KeodUd6IbuDI7vj8NuB/hf4JV40M=
+      - Jwt__Issuer=Issuer
+      - Jwt__Audience=Audience
+      - Jwt__ExpirationMinutes=60
+    depends_on:
+      - postgres
+
+  web_app:
+    build:
+      context: .
+      dockerfile: WEB/Dockerfile
+    container_name: hot_desk_booking_web
+    restart: always
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./WEB:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://aspnetcore_app:5106
+    depends_on:
+      - aspnetcore_app
+
+volumes:
+  postgres_data:
+  pgadmin_data:
