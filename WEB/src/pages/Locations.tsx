@@ -99,9 +99,11 @@ export default function Locations() {
     <div className="min-h-screen p-4">
       <div className="text-xl font-semibold mt-4">Locations</div>
       <div className="flex flex-col w-full">
-        <div className="w-40 pb-2">
-          <AddLocationModal onSuccess={fetchLocations} />
-        </div>
+        {admin && (
+          <div className="w-40 pb-2">
+            <AddLocationModal onSuccess={fetchLocations} />
+          </div>
+        )}
         <div className="flex justify-between items-center mb-4">
           <Search
             searchTerm={searchTerm}
