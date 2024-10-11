@@ -43,17 +43,25 @@ public class ReservationController : ControllerBase
         }
     }
     
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{id}/{userId}")]
+    public async Task<IActionResult> Delete(int id, int userId)
     {
         try
         {
-            await _reservationService.RemoveAsync(id);
+            await _reservationService.RemoveAsync(id, userId);
             return NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized("You are not authorized to delete this reservation.");
+        }
+        catch (ArgumentException)
+        {
+            return NotFound("Reservation not found.");
         }
         catch (Exception)
         {
-            return StatusCode(500);
+            return StatusCode(500, "An error occurred while processing your request.");
         }
     }
     
@@ -70,6 +78,4 @@ public class ReservationController : ControllerBase
             return StatusCode(500);
         }
     }
-    
-    
 }

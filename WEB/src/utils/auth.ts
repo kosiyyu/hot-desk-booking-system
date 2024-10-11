@@ -74,12 +74,12 @@ export const isAdmin = (): boolean => {
   return payload ? payload.role === 'Admin' : false;
 };
 
-export const getUserId = (): string | null => {
+export const getUserId = (): number | null => {
   const token = getToken();
   if (!token) return null;
 
   const payload = decodeToken(token);
-  return payload ? payload.sub : null;
+  return payload ? Number.parseInt(payload.sub) : null;
 };
 
 export const getUserEmail = (): string | null => {

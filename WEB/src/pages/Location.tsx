@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { isAdmin } from '../utils/auth';
-import ReservationModal from '../components/custom/ReservationModal';
+import { isAdmin, getUserId } from '../utils/auth';
+import AddReservationModal from '../components/custom/AddReservationModal';
+import DeleteReservationModal from '../components/custom/DeleteReservationModal';
 
 import DeskList from '../components/custom/DeskList';
 import AvailabilityCalendar from '../components/custom/AvailabilityCalendar';
@@ -32,6 +33,7 @@ enum AvailabilityStatus {
 type DailyAvailability = {
   date: string;
   status: AvailabilityStatus;
+  reservationId?: number;
 };
 
 export default function Location() {
@@ -47,8 +49,13 @@ export default function Location() {
   const [selectedReservationDate, setSelectedReservationDate] = useState<
     string | null
   >(null);
+  const [deleteModalData, setDeleteModalData] = useState<{
+    deskId: number;
+    reservationId: number;
+    reservationDate: string;
+  } | null>(null);
 
-  const userId = 2;
+  const userId = getUserId() as number;
 
   const fetchLocation = async () => {
     try {
@@ -67,12 +74,15 @@ export default function Location() {
 
   const fetchMonthCard = async (deskId: number) => {
     try {
-      const response = await axios.get<{ date: string; status: number }[]>(
+      const response = await axios.get<
+        { date: string; status: number; reservationId?: number }[]
+      >(
         `http://localhost:5106/api/desk/${deskId}/availability/array/${month}/${userId}`,
       );
       const mappedData: DailyAvailability[] = response.data.map((item) => ({
         date: item.date,
         status: item.status as AvailabilityStatus,
+        reservationId: item.reservationId,
       }));
       setMonthCard(mappedData);
       setSelectedDeskId(deskId);
@@ -93,13 +103,45 @@ export default function Location() {
     }
   };
 
+  const handleDeleteClick = (
+    day: number,
+    status: AvailabilityStatus,
+    reservationId: number,
+  ) => {
+    if (
+      (status === AvailabilityStatus.ReservedByUser ||
+        status === AvailabilityStatus.ReservedByOther) &&
+      selectedDeskId
+    ) {
+      const selectedDate = `${month}-${String(day).padStart(2, '0')}`;
+      setDeleteModalData({
+        deskId: selectedDeskId,
+        reservationId: reservationId,
+        reservationDate: selectedDate,
+      });
+    }
+  };
+
   const handleReservationSuccess = () => {
     setSelectedReservationDate(null);
-    fetchMonthCard(selectedDeskId!);
+    if (selectedDeskId) {
+      fetchMonthCard(selectedDeskId);
+    }
   };
 
   const handleReservationClose = () => {
     setSelectedReservationDate(null);
+  };
+
+  const handleDeleteSuccess = () => {
+    setDeleteModalData(null);
+    if (selectedDeskId) {
+      fetchMonthCard(selectedDeskId);
+    }
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteModalData(null);
   };
 
   useEffect(() => {
@@ -144,12 +186,13 @@ export default function Location() {
               month={month}
               monthCard={monthCard}
               selectedDeskName={
-                location.desks.find((x) => x.deskId === selectedDeskId)?.name ||
-                ''
+                location?.desks.find((x) => x.deskId === selectedDeskId)
+                  ?.name || ''
               }
               selectedDeskId={selectedDeskId}
               onMonthChange={handleMonthChange}
               onDayClick={handleDayClick}
+              onDeleteClick={handleDeleteClick}
             />
           )}
           {selectedDeskId && monthCard.length === 0 && (
@@ -165,12 +208,23 @@ export default function Location() {
       )}
 
       {selectedReservationDate && selectedDeskId && (
-        <ReservationModal
+        <AddReservationModal
           userId={userId}
           deskId={selectedDeskId}
           reservationDate={selectedReservationDate}
           onSuccess={handleReservationSuccess}
           onClose={handleReservationClose}
+        />
+      )}
+
+      {deleteModalData && (
+        <DeleteReservationModal
+          userId={userId}
+          deskId={deleteModalData.deskId}
+          reservationId={deleteModalData.reservationId}
+          reservationDate={deleteModalData.reservationDate}
+          onSuccess={handleDeleteSuccess}
+          onClose={handleDeleteClose}
         />
       )}
     </div>

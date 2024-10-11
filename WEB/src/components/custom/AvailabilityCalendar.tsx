@@ -1,5 +1,6 @@
 import React from 'react';
 import Calendar from './Calendar';
+import { X } from 'lucide-react';
 
 enum AvailabilityStatus {
   Available = 0,
@@ -11,6 +12,7 @@ enum AvailabilityStatus {
 type DailyAvailability = {
   date: string;
   status: AvailabilityStatus;
+  reservationId?: number;
 };
 
 type AvailabilityCalendarProps = {
@@ -20,6 +22,11 @@ type AvailabilityCalendarProps = {
   selectedDeskId: number;
   onMonthChange: (newValue: string) => void;
   onDayClick: (day: number, status: AvailabilityStatus) => void;
+  onDeleteClick: (
+    day: number,
+    status: AvailabilityStatus,
+    reservationId: number,
+  ) => void;
 };
 
 const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
@@ -29,6 +36,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   selectedDeskId,
   onMonthChange,
   onDayClick,
+  onDeleteClick,
 }) => {
   const generateCalendar = () => {
     const currentDate = new Date(month);
@@ -50,6 +58,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       calendarDays.push({
         day,
         status: availability ? availability.status : AvailabilityStatus.Past,
+        reservationId: availability?.reservationId,
       });
     }
 
@@ -73,10 +82,10 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   return (
     <div className="mt-4">
-      <h3 className="font-semibold">
+      <div className="font-semibold">
         Availability for {selectedDeskName} (ID: {selectedDeskId}) in{' '}
         <Calendar value={month} onChange={onMonthChange} className="" />
-      </h3>
+      </div>
       <div className="grid grid-cols-7 gap-4 mt-2 border rounded-lg p-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
           <div key={dayName} className="font-bold text-center">
@@ -89,10 +98,22 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
               key={index}
               className={`p-2 text-center rounded-md ${getStatusColor(
                 day.status,
-              )}`}
+              )} relative`}
               onClick={() => onDayClick(day.day, day.status)}
             >
               {day.day}
+              {day.status === AvailabilityStatus.ReservedByUser &&
+                day.reservationId && (
+                  <X
+                    className="absolute top-1 right-1 cursor-pointer bg-red-400 rounded-sm"
+                    size={16}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDeleteClick(day.day, day.status, day.reservationId!);
+                    }}
+                  />
+                )}
             </div>
           ) : (
             <div key={index} className="p-2" />

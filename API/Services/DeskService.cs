@@ -79,7 +79,7 @@ public class DeskService : IDeskService
                 r.DeskId == deskId &&
                 r.ReservationDate >= startOfMonth && 
                 r.ReservationDate <= endOfMonth)
-            .Select(r => new { r.ReservationDate, r.UserId })
+            .Select(r => new { r.ReservationDate, r.UserId, r.ReservationId })
             .ToListAsync();
 
         var result = new List<DailyAvailability>();
@@ -88,7 +88,7 @@ public class DeskService : IDeskService
         {
             var reservation = reservations.FirstOrDefault(r => r.ReservationDate == date);
             var availability = DetermineAvailability(date, today, reservation, userId);
-            result.Add(new DailyAvailability(date, availability));
+            result.Add(new DailyAvailability(date, availability, reservation?.ReservationId));
         }
 
         return result;

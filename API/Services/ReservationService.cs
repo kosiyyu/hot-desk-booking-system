@@ -53,7 +53,7 @@ public class ReservationService : IReservationService
         }
     }
 
-    public async Task RemoveAsync(int id)
+    public async Task RemoveAsync(int id, int userId)
     {
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
@@ -61,8 +61,11 @@ public class ReservationService : IReservationService
             var reservation = await _ctx.Reservations
                 .FirstOrDefaultAsync(x => x.ReservationId == id);
 
-            if (reservation == null) throw new ArgumentException();
+            if (reservation == null) throw new ArgumentException("Reservation not found");
             
+            if (reservation.UserId != userId)
+                throw new UnauthorizedAccessException("You are not authorized to delete this reservation.");
+
             _ctx.Reservations.Remove(reservation);
             await _ctx.SaveChangesAsync();
             await transaction.CommitAsync();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface ReservationModalProps {
+interface AddReservationModalProps {
   userId: number;
   deskId: number;
   reservationDate: string;
@@ -9,7 +9,7 @@ interface ReservationModalProps {
   onClose: () => void;
 }
 
-const ReservationModal: React.FC<ReservationModalProps> = ({
+const AddReservationModal: React.FC<AddReservationModalProps> = ({
   userId,
   deskId,
   reservationDate,
@@ -38,6 +38,7 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
       );
       console.log('Reservation response:', response.data);
       onSuccess();
+      onClose();
     } catch (error) {
       console.error('Error making reservation:', error);
       setError('Failed to make reservation. Please try again.');
@@ -77,4 +78,4 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
   );
 };
 
-export default ReservationModal;
+export default AddReservationModal;
