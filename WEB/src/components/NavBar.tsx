@@ -1,7 +1,7 @@
 import { Button } from './Button.tsx';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { isAuthenticated, logout, isAdmin, getUserEmail } from '../utils/auth';
-import { Home } from 'lucide-react';
+import { isAuthenticated, logout, getUserEmail } from '../utils/auth';
+import { MapPinHouse, User } from 'lucide-react';
 
 export function NavBar() {
   const navigate = useNavigate();
@@ -19,8 +19,9 @@ export function NavBar() {
       <div className="flex justify-start items-center w-[33.33%] h-16">
         <div className="w-2" />
         <Button>
-          <Link to="/">
-            <Home size={36} className="mx-2 text-white bg-black" />
+          <Link to="/" className="flex justify-center items-center">
+            <MapPinHouse size={24} className="pl-2" />
+            <div className="px-2">Locations</div>
           </Link>
         </Button>
       </div>
@@ -28,15 +29,15 @@ export function NavBar() {
       <div className="flex justify-end items-center w-[33.33%] space-x-4 pr-4">
         {authenticated ? (
           <>
-            <Link to="/user" className="text-sm font-medium hover:underline">
-              {userEmail}
-            </Link>
-            {isAdmin() && (
-              <Link to="/admin">
-                <Button>Admin Panel</Button>
+            <Button>
+              <Link to="/user" className="flex justify-center items-center">
+                <User size={24} className="pl-2" />
+                <div className="px-2">{userEmail}</div>
               </Link>
-            )}
-            <Button onClick={handleLogout}>Logout</Button>
+            </Button>
+            <Button onClick={handleLogout}>
+              <div className="px-2">Logout</div>
+            </Button>
           </>
         ) : (
           <>

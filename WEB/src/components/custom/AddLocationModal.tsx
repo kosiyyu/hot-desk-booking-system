@@ -29,9 +29,9 @@ export const AddLocationModal: React.FC<AddLocationModalProps> = ({
   return (
     <Modal
       trigger={
-        <div className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+        <button className="border p-4 mb-2 rounded-lg my-2 mr-2 text-green-500 cursor-pointer hover:bg-green-50">
           Add Location
-        </div>
+        </button>
       }
       title="Add New Location"
     >

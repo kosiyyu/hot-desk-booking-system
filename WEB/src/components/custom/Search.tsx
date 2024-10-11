@@ -14,7 +14,7 @@ const Search: React.FC<SearchProps> = ({
   handleSearch,
 }) => {
   return (
-    <div className="flex justify-center items-center h-12 rounded-lg border focus-within:border-black mb-4 group">
+    <div className="flex w-full justify-center items-center h-12 rounded-lg border focus-within:border-black mb-4 group">
       <input
         type="text"
         placeholder="Search locations"

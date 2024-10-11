@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { AddLocationModal } from '../components/custom/AddLocationModal';
 import { isAdmin } from '../utils/auth';
+import { EditLocationModal } from '../components/custom/EditLocationModal';
 
 type Location = {
   locationId: number;
@@ -82,11 +83,6 @@ export default function Locations() {
     }
   };
 
-  const handleGoToPage = () => {
-    const newPage = Math.min(Math.max(1, pageNumber), totalPages);
-    setPage(newPage);
-  };
-
   const handleRemoveLocation = async (locationId: number) => {
     try {
       await axios.delete(`http://localhost:5106/api/location/${locationId}`);
@@ -101,8 +97,9 @@ export default function Locations() {
 
   return (
     <div className="min-h-screen p-4">
+      <div className="text-xl font-semibold mt-4">Locations</div>
       <div className="flex flex-col w-full">
-        <div className="flex justify-center items-center p-2 border mb-2 rounded-lg">
+        <div className="w-40 pb-2">
           <AddLocationModal onSuccess={fetchLocations} />
         </div>
         <div className="flex justify-between items-center mb-4">
@@ -154,12 +151,22 @@ export default function Locations() {
                   </div>
 
                   {admin && (
-                    <Button
-                      onClick={() => handleRemoveLocation(location.locationId)}
-                      className="px-2 py-1 bg-red-500 text-white rounded"
-                    >
-                      Remove
-                    </Button>
+                    <div className="flex justify-between items-center pr-2">
+                      <button
+                        onClick={() =>
+                          handleRemoveLocation(location.locationId)
+                        }
+                        className="border p-4 rounded-lg my-2 mr-2 text-red-500 cursor-pointer hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                      <EditLocationModal
+                        locationId={location.locationId}
+                        name={location.name}
+                        address={location.address}
+                        onSuccess={fetchLocations}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -191,10 +198,8 @@ export default function Locations() {
                 value={pageNumber}
                 onChange={handlePageNumberChange}
                 className="ml-2 pl-1 h-9 bg-black focus:outline-none"
+                disabled
               />
-              <div className="mx-2" onClick={handleGoToPage}>
-                Go
-              </div>
             </div>
           </Button>
           <div className="mt-2 text-gray-500 text-center text-xs">

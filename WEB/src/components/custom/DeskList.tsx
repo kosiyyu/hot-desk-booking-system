@@ -61,7 +61,7 @@ const DeskList: React.FC<DeskListProps> = ({
             </div>
           </div>
           {isAdmin && (
-            <>
+            <div className="flex flex-row items-center justify-end w-full">
               <DeleteDeskModal
                 deskId={desk.deskId}
                 deskName={desk.name}
@@ -72,7 +72,7 @@ const DeskList: React.FC<DeskListProps> = ({
                 deskName={desk.name}
                 onSuccess={onLocationRefresh}
               />
-            </>
+            </div>
           )}
         </div>
       ))}
