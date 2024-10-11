@@ -31,8 +31,14 @@ public class DeskService : IDeskService
     {
         var desk = await _ctx.Desks.FindAsync(id);
         if (desk == null) 
-            throw new ArgumentException();
+            throw new ArgumentException("Desk not found");
         
+        var hasReservations = await _ctx.Reservations
+            .AnyAsync(r => r.DeskId == id && r.ReservationDate >= DateOnly.FromDateTime(DateTime.Now));
+
+        if (hasReservations)
+            throw new InvalidOperationException("Cannot delete desk with future reservations");
+
         _ctx.Desks.Remove(desk);
         await _ctx.SaveChangesAsync();
     }
@@ -41,14 +47,14 @@ public class DeskService : IDeskService
     {
         var desk = await _ctx.Desks.FindAsync(id);
         if (desk == null) 
-            throw new ArgumentException();
+            throw new ArgumentException("Desk not found");
         
-        // TODO 
-        // prevent from using fake LocationId
+        var locationExists = await _ctx.Locations.AnyAsync(l => l.LocationId == deskDto.LocationId);
+        if (!locationExists)
+            throw new ArgumentException("Invalid LocationId");
 
         desk.Name = deskDto.Name;
-        // no change for LocationId since Desks are meant to be only deleted / added
-        // changing Name should be possible as well
+        desk.LocationId = deskDto.LocationId;
         
         _ctx.Desks.Update(desk);
         await _ctx.SaveChangesAsync();
