@@ -1,6 +1,7 @@
 import { Button } from './Button.tsx';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { isAuthenticated, logout, isAdmin, getUserEmail } from '../utils/auth';
+import { Home } from 'lucide-react';
 
 export function NavBar() {
   const navigate = useNavigate();
@@ -15,12 +16,13 @@ export function NavBar() {
 
   return (
     <div className="w-full flex flex-row border">
-      <div className="flex justify-start items-center w-[33.33%]">
-        <img
-          src={'uncommend logoPath'}
-          className="h-12 w-auto m-2"
-          alt="Logo"
-        />
+      <div className="flex justify-start items-center w-[33.33%] h-16">
+        <div className="w-2" />
+        <Button>
+          <Link to="/">
+            <Home size={36} className="mx-2 text-white bg-black" />
+          </Link>
+        </Button>
       </div>
       <div className="flex justify-center w-[33.33%]"></div>
       <div className="flex justify-end items-center w-[33.33%] space-x-4 pr-4">

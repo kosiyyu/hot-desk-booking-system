@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/Button.tsx';
+import { Button } from '../components/Button';
 import axios from 'axios';
 
 const Register: React.FC = () => {
@@ -14,11 +14,14 @@ const Register: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5106/api/user', {
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        'http://localhost:5106/api/user/register',
+        {
+          username,
+          email,
+          password,
+        },
+      );
 
       if (response.status === 201) {
         navigate('/login');
@@ -26,7 +29,11 @@ const Register: React.FC = () => {
         setError('Registration failed. Please try again.');
       }
     } catch (err) {
-      setError('An error occurred during registration. Please try again.');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data || 'Registration failed. Please try again.');
+      } else {
+        setError('An error occurred during registration. Please try again.');
+      }
       console.error('Registration error:', err);
     }
   };

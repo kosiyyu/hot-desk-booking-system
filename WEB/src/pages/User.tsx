@@ -29,7 +29,7 @@ const User: React.FC = () => {
           <strong>Email:</strong> {userEmail}
         </div>
         <div>
-          <strong>Role:</strong> {isAdmin() ? 'User' : 'Guest'}
+          <strong>Role:</strong> {isAdmin() ? 'Admin' : 'User'}
         </div>
         <div>
           <strong>Username:</strong> {username}

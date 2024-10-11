@@ -61,25 +61,45 @@ export const decodeToken = (token: string): JWTPayload | null => {
   }
 };
 
-export const isTokenExpired = (token: string) => {
-  const payload = decodeToken(token);
-  return payload ? payload.exp * 1000 < Date.now() : true;
-};
+// export const isTokenExpired = (token: string) => {
+//   const payload = decodeToken(token);
+//   return payload ? payload.exp * 1000 < Date.now() : true;
+// };
+
+interface ExtendedJWTPayload {
+  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'?: string;
+  exp?: number;
+  sub?: string;
+  // Add other properties if needed
+}
 
 export const isAdmin = (): boolean => {
   const token = getToken();
   if (!token) return false;
 
-  const payload = decodeToken(token);
-  return payload ? payload.role === 'Admin' : false;
+  const payload: ExtendedJWTPayload | null = decodeToken(token);
+
+  console.log('isAdmin token:', payload); // Log the entire payload
+  console.log('Payload keys:', payload ? Object.keys(payload) : []); // Log the keys of the payload
+
+  const roleClaim =
+    payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+  console.log('Role claim:', roleClaim); // Log the role claim
+
+  return roleClaim === 'Admin';
+};
+
+export const isTokenExpired = (token: string) => {
+  const payload: ExtendedJWTPayload | null = decodeToken(token);
+  return payload ? payload.exp! * 1000 < Date.now() : true;
 };
 
 export const getUserId = (): number | null => {
   const token = getToken();
   if (!token) return null;
 
-  const payload = decodeToken(token);
-  return payload ? Number.parseInt(payload.sub) : null;
+  const payload: ExtendedJWTPayload | null = decodeToken(token);
+  return payload ? Number.parseInt(payload.sub!) : null;
 };
 
 export const getUserEmail = (): string | null => {

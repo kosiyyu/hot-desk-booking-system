@@ -3,6 +3,8 @@ import Search from '../components/custom/Search';
 import { Button } from '../components/Button';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { AddLocationModal } from '../components/custom/AddLocationModal';
+import { isAdmin } from '../utils/auth';
 
 type Location = {
   locationId: number;
@@ -28,6 +30,9 @@ export default function Locations() {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const admin = isAdmin();
 
   useEffect(() => {
     fetchLocations();
@@ -51,6 +56,7 @@ export default function Locations() {
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error('Error fetching locations:', error);
+      setLocations([]);
     } finally {
       setIsLoading(false);
     }
@@ -81,38 +87,90 @@ export default function Locations() {
     setPage(newPage);
   };
 
+  const handleRemoveLocation = async (locationId: number) => {
+    try {
+      await axios.delete(`http://localhost:5106/api/location/${locationId}`);
+
+      fetchLocations();
+      setErrorMessage(null);
+    } catch (error) {
+      console.error('Error removing location:', error);
+      setErrorMessage('Failed to delete location. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen p-4">
-      <Search
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        handleSearch={handleSearch}
-      />
+      <div className="flex flex-col w-full">
+        <div className="flex justify-center items-center p-2 border mb-2 rounded-lg">
+          <AddLocationModal onSuccess={fetchLocations} />
+        </div>
+        <div className="flex justify-between items-center mb-4">
+          <Search
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            handleSearch={handleSearch}
+          />
+        </div>
+      </div>
+
+      {errorMessage && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errorMessage}
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="ml-4 text-sm text-red-500"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="text-center">Loading...</div>
       ) : (
         <div className="mb-4 rounded-lg border">
-          {locations.map((location, index) => (
-            <div
-              key={location.locationId}
-              className={`p-2 ${
-                index !== locations.length - 1 ? 'border-b' : ''
-              }`}
-            >
-              <div className="font-bold">
-                <Link to={`location/${location.locationId}`}>
-                  {location.name}
-                </Link>
+          {locations.length > 0 ? (
+            locations.map((location, index) => (
+              <div
+                key={location.locationId}
+                className={`p-2 ${
+                  index !== locations.length - 1 ? 'border-b' : ''
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="font-bold">
+                      <Link to={`location/${location.locationId}`}>
+                        {location.name}
+                      </Link>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {location.address}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      ID: {location.locationId}
+                    </div>
+                  </div>
+
+                  {admin && (
+                    <Button
+                      onClick={() => handleRemoveLocation(location.locationId)}
+                      className="px-2 py-1 bg-red-500 text-white rounded"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="text-xs text-gray-400">{location.address}</div>
-              <div className="text-xs text-gray-400">
-                ID: {location.locationId}
-              </div>
+            ))
+          ) : (
+            <div className="p-2 text-center text-gray-500">
+              No locations found
             </div>
-          ))}
+          )}
         </div>
       )}
-
       <div className="flex justify-between items-start">
         <Button
           onClick={handlePrevPage}
