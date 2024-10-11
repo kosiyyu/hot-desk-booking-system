@@ -68,7 +68,7 @@ public class DeskService : IDeskService
         return !isReserved;
     }
     
-    public async Task<List<DailyAvailability>> DesksAvailableByMonth(DateOnly reservationDate, int id)
+    public async Task<List<DailyAvailability>> DesksAvailableByMonth(DateOnly reservationDate, int deskId, int userId)
     {
         var startOfMonth = new DateOnly(reservationDate.Year, reservationDate.Month, 1);
         var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
@@ -76,20 +76,32 @@ public class DeskService : IDeskService
         
         var reservations = await _ctx.Reservations
             .Where(r =>
-                r.DeskId == id &&
+                r.DeskId == deskId &&
                 r.ReservationDate >= startOfMonth && 
                 r.ReservationDate <= endOfMonth)
-            .Select(r => r.ReservationDate)
+            .Select(r => new { r.ReservationDate, r.UserId })
             .ToListAsync();
 
         var result = new List<DailyAvailability>();
 
         for (var date = startOfMonth; date <= endOfMonth; date = date.AddDays(1))
         {
-            var isAvailable = date > today && !reservations.Contains(date);
-            result.Add(new DailyAvailability(date, isAvailable));
+            var reservation = reservations.FirstOrDefault(r => r.ReservationDate == date);
+            var availability = DetermineAvailability(date, today, reservation, userId);
+            result.Add(new DailyAvailability(date, availability));
         }
 
         return result;
+    }
+    
+    private AvailabilityStatus DetermineAvailability(DateOnly date, DateOnly today, dynamic reservation, int userId)
+    {
+        if (date <= today)
+            return AvailabilityStatus.Past;
+        
+        if (reservation == null)
+            return AvailabilityStatus.Available;
+        
+        return reservation.UserId == userId ? AvailabilityStatus.ReservedByUser : AvailabilityStatus.ReservedByOther;
     }
 }

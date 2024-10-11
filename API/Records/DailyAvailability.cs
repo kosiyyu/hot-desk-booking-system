@@ -1,3 +1,3 @@
 namespace HotDeskWebApp.Records;
 
-public record DailyAvailability(DateOnly date, bool isAvailable);
+public record DailyAvailability(DateOnly Date, AvailabilityStatus Status);

@@ -57,13 +57,13 @@ public class DeskController : ControllerBase
         }
     }
 
-    [HttpGet("{id}/availability/array/{dateOnlyString}")]
-    public async Task<IActionResult> GetAvailabilityArray(string dateOnlyString, int id)
+    [HttpGet("{deskId}/availability/array/{dateOnlyString}/{userId}")]
+    public async Task<IActionResult> GetAvailabilityArray(string dateOnlyString, int deskId, int userId)
     {
         try
         {
             var date = DateOnly.Parse(dateOnlyString);
-            var array = await _deskService.DesksAvailableByMonth(date, id);
+            var array = await _deskService.DesksAvailableByMonth(date, deskId, userId);
 
             return Ok(array);
         }

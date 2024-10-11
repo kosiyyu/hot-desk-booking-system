@@ -21,9 +21,16 @@ type LocationType = {
   desks: Array<Desk>;
 };
 
+enum AvailabilityStatus {
+  Available = 0,
+  ReservedByUser = 1,
+  ReservedByOther = 2,
+  Past = 3,
+}
+
 type DailyAvailability = {
   date: string;
-  isAvailable: boolean;
+  status: AvailabilityStatus;
 };
 
 export default function Location() {
@@ -39,6 +46,8 @@ export default function Location() {
   const [selectedReservationDate, setSelectedReservationDate] = useState<
     string | null
   >(null);
+
+  const userId = 2;
 
   const fetchLocation = async () => {
     try {
@@ -57,10 +66,14 @@ export default function Location() {
 
   const fetchMonthCard = async (deskId: number) => {
     try {
-      const response = await axios.get<DailyAvailability[]>(
-        `http://localhost:5106/api/desk/${deskId}/availability/array/${month}`,
+      const response = await axios.get<{ date: string; status: number }[]>(
+        `http://localhost:5106/api/desk/${deskId}/availability/array/${month}/${userId}`,
       );
-      setMonthCard(response.data);
+      const mappedData: DailyAvailability[] = response.data.map((item) => ({
+        date: item.date,
+        status: item.status as AvailabilityStatus,
+      }));
+      setMonthCard(mappedData);
       setSelectedDeskId(deskId);
     } catch (error) {
       setError('Error fetching availability data');
@@ -72,8 +85,8 @@ export default function Location() {
     setMonth(newValue);
   };
 
-  const handleDayClick = (day: number, isAvailable: boolean) => {
-    if (isAvailable && selectedDeskId) {
+  const handleDayClick = (day: number, status: AvailabilityStatus) => {
+    if (status === AvailabilityStatus.Available && selectedDeskId) {
       const selectedDate = `${month}-${String(day).padStart(2, '0')}`;
       setSelectedReservationDate(selectedDate);
     }
@@ -125,11 +138,26 @@ export default function Location() {
       const availability = monthCard.find((av) => av.date === dayStr);
       calendarDays.push({
         day,
-        isAvailable: availability ? availability.isAvailable : false,
+        status: availability ? availability.status : AvailabilityStatus.Past,
       });
     }
 
     return [...emptyDays, ...calendarDays];
+  };
+
+  const getStatusColor = (status: AvailabilityStatus) => {
+    switch (status) {
+      case AvailabilityStatus.Available:
+        return 'bg-green-200 cursor-pointer';
+      case AvailabilityStatus.ReservedByUser:
+        return 'bg-blue-200';
+      case AvailabilityStatus.ReservedByOther:
+        return 'bg-yellow-200';
+      case AvailabilityStatus.Past:
+        return 'bg-gray-200';
+      default:
+        return 'bg-red-200';
+    }
   };
 
   const areDesksAvailable = location && location.desks.length > 0;
@@ -217,16 +245,20 @@ export default function Location() {
     return (
       <div className="mt-2 border rounded-lg">
         <div className="flex flex-row items-center border-b py-2 pl-2">
-          <div className="bg-red-200 rounded-full w-4 h-4" />
-          <div className="ml-2 text-xs">Unavailable</div>
-        </div>
-        <div className="flex flex-row items-center border-b py-2 pl-2">
           <div className="bg-green-200 rounded-full w-4 h-4" />
           <div className="ml-2 text-xs">Available</div>
         </div>
+        <div className="flex flex-row items-center border-b py-2 pl-2">
+          <div className="bg-blue-200 rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Reserved by you</div>
+        </div>
+        <div className="flex flex-row items-center border-b py-2 pl-2">
+          <div className="bg-yellow-200 rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Reserved by others</div>
+        </div>
         <div className="flex flex-row items-center py-2 pl-2">
-          <div className="border-2 border-special rounded-full w-4 h-4" />
-          <div className="ml-2 text-xs">Reservation</div>
+          <div className="bg-gray-200 rounded-full w-4 h-4" />
+          <div className="ml-2 text-xs">Past</div>
         </div>
       </div>
     );
@@ -273,12 +305,10 @@ export default function Location() {
                   day ? (
                     <div
                       key={index}
-                      className={`p-2 text-center rounded-md ${
-                        day.isAvailable
-                          ? 'bg-green-200 cursor-pointer'
-                          : 'bg-red-200'
-                      }`}
-                      onClick={() => handleDayClick(day.day, day.isAvailable)}
+                      className={`p-2 text-center rounded-md ${getStatusColor(
+                        day.status,
+                      )}`}
+                      onClick={() => handleDayClick(day.day, day.status)}
                     >
                       {day.day}
                     </div>
