@@ -83,59 +83,6 @@ public class ReservationService : IReservationService
             throw;
         }
     }
-    
-    public async Task<Reservation> FindByIdAsync(int id)
-    {
-        var reservation = await _ctx.Reservations
-            .Include(x => x.Desk)
-            .Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.ReservationId == id);
-        
-        if (reservation == null) throw new ArgumentException("Reservation not found");
-
-        return reservation;
-    }
-
-    public async Task EditAsync(ReservationDTO reservationDto, int id)
-    {
-        await using var transaction = await _ctx.Database.BeginTransactionAsync();
-        try
-        {
-            var reservation = await _ctx.Reservations
-                .FirstOrDefaultAsync(x => x.ReservationId == id);
-            if (reservation == null) throw new ArgumentException("Reservation not found");
-
-            var isAny = await _ctx.Reservations
-                .AnyAsync(x =>
-                    x.ReservationId != id &&
-                    x.DeskId == reservationDto.DeskId &&
-                    x.ReservationDate == reservationDto.ReservationDate);
-            if (isAny) throw new InvalidOperationException("Desk is already reserved for this date");
-
-            if (DateOnly.FromDateTime(DateTime.Now.AddHours(24)) >= reservation.ReservationDate)
-                throw new InvalidOperationException("Cannot edit reservations within 24 hours of the reservation time");
-            
-            if (reservationDto.ReservationDate <= DateOnly.FromDateTime(DateTime.Now))
-                throw new ArgumentException("Reservation date must be in the future");
-            
-            // Check if the edit would result in more than 7 consecutive days of reservations
-            if (await WouldExceedSevenConsecutiveDays(reservationDto.UserId, reservationDto.DeskId, reservationDto.ReservationDate, id))
-                throw new InvalidOperationException("This change would result in more than 7 consecutive days of reservations");
-
-            reservation.ReservationDate = reservationDto.ReservationDate;
-            reservation.UserId = reservationDto.UserId;
-            reservation.DeskId = reservationDto.DeskId;
-
-            _ctx.Reservations.Update(reservation);
-            await _ctx.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
 
     private async Task<bool> WouldExceedSevenConsecutiveDays(int userId, int deskId, DateOnly newReservationDate, int? excludeReservationId = null)
     {

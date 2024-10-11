@@ -15,7 +15,7 @@ public class DeskController : ControllerBase
     {
         _deskService = deskService;
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] DeskDTO deskDto)
     {
@@ -29,7 +29,7 @@ public class DeskController : ControllerBase
             return StatusCode(500);
         }
     }
-
+    
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -43,7 +43,7 @@ public class DeskController : ControllerBase
             return StatusCode(500);
         }
     }
-
+    
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(DeskDTO deskDto, int id)
     {
@@ -58,7 +58,7 @@ public class DeskController : ControllerBase
             return StatusCode(500);
         }
     }
-
+    
     [HttpGet("{deskId}/availability/array/{dateOnlyString}/{userId}")]
     public async Task<IActionResult> GetAvailabilityArray(string dateOnlyString, int deskId, int userId)
     {
@@ -68,23 +68,6 @@ public class DeskController : ControllerBase
             var array = await _deskService.DesksAvailableByMonth(date, deskId, userId);
 
             return Ok(array);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500);
-        }
-    }
-
-    [Authorize]
-    [HttpGet("{id}/availability/date/{dateOnlyString}")]
-    public async Task<IActionResult> IsAvailable(int id, string dateOnlyString)
-    {
-        try
-        {
-            var date = DateOnly.Parse(dateOnlyString);
-            var isAvailable = await _deskService.IsAvailable(id, date);
-
-            return Ok(isAvailable);
         }
         catch (Exception e)
         {

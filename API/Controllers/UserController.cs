@@ -16,6 +16,7 @@ namespace HotDeskWebApp.Controllers
             _userService = userService;
         }
 
+        
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO userDto)
         {
@@ -41,56 +42,6 @@ namespace HotDeskWebApp.Controllers
             {
                 var jwt = await _userService.ValidateUserAsync(userDto);
                 return Ok(jwt);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserDTO userDto)
-        {
-            try
-            {
-                var validationError = ValidateUserDto(userDto);
-                if (validationError != null)
-                    return BadRequest(validationError);
-
-                // Add the new user
-                await _userService.AddAsync(userDto);
-                return StatusCode(201, "User created successfully.");
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
-        }
-        
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                await _userService.RemoveAsync(id);
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
-        }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            try
-            {
-                var user = await _userService.FindById(id);
-                if (user == null)
-                    return NotFound("User not found.");
-
-                return Ok(user);
             }
             catch (Exception)
             {

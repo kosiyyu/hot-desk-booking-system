@@ -15,7 +15,7 @@ public class LocationController : ControllerBase
     {
         _locationService = locationService;
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> Create([FromBody]LocationDTO locationDto)
     {
@@ -30,7 +30,7 @@ public class LocationController : ControllerBase
             return StatusCode(500);
         }
     }
-
+    
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -52,20 +52,6 @@ public class LocationController : ControllerBase
         {
             await _locationService.EditAsync(locationDto, id);
             return Ok();
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500);
-        }
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-    {
-        try
-        {
-            var location = await _locationService.FindByIdAsync(id);
-            return Ok(location);
         }
         catch (Exception e)
         {
@@ -102,12 +88,5 @@ public class LocationController : ControllerBase
         };
 
         return Ok(result);
-    }
-    
-    [HttpGet("count")]
-    public async Task<IActionResult> GetTotalLocationCount()
-    {
-        var count = await _locationService.CountAsync();
-        return Ok(count);
     }
 }

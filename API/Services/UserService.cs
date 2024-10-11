@@ -32,26 +32,6 @@ public class UserService : IUserService
         await _ctx.AddAsync(user);
         await _ctx.SaveChangesAsync();
     }
-
-    public async Task RemoveAsync(int id)
-    {
-        var user = await _ctx.Users.FindAsync(id);
-        if (user == null) throw new ArgumentException("User not found");
-
-        if (user.IsAdmin) throw new ArgumentException("User can't be removed due to its administrator rights");
-        
-        _ctx.Remove(user);
-        await _ctx.SaveChangesAsync();
-    }
-
-    public async Task<User> FindById(int id)
-    {
-        var user = await _ctx.Users
-            .FirstAsync(x => x.UserId == id);
-        if (user == null) throw new ArgumentException();
-
-        return user;
-    }
     
     public async Task<string> ValidateUserAsync(UserDTO userDto)
     {

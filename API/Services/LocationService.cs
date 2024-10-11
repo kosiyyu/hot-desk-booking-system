@@ -67,17 +67,6 @@ public class LocationService : ILocationService
         await _ctx.SaveChangesAsync();
     }
 
-    public async Task<Location> FindByIdAsync(int id)
-    {
-        var location = await _ctx.Locations
-            .FirstAsync(x => x.LocationId == id);
-        
-        if (location == null) 
-            throw new ArgumentException("Location not found");
-        
-        return location;
-    }
-
     public async Task<LocationOut> FindByIdJoinAsync(int id)
     {
         var location = await _ctx.Locations
@@ -118,10 +107,4 @@ public class LocationService : ILocationService
 
         return (locations, totalCount);
     }
-    
-    public async Task<int> CountAsync()
-    {
-        return await _ctx.Locations.CountAsync();
-    }
-
 }

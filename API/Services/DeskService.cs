@@ -59,20 +59,6 @@ public class DeskService : IDeskService
         _ctx.Desks.Update(desk);
         await _ctx.SaveChangesAsync();
     }
-
-    public async Task<bool> IsAvailable(int id, DateOnly reservationDate)
-    {
-        var deskExists = await _ctx.Desks.AnyAsync(x => x.DeskId == id);
-        if (!deskExists)
-            return false;
-
-        var isReserved = await _ctx.Reservations
-            .AnyAsync(r =>
-                r.DeskId == id &&
-                r.ReservationDate == reservationDate);
-
-        return !isReserved;
-    }
     
     public async Task<List<DailyAvailability>> DesksAvailableByMonth(DateOnly reservationDate, int deskId, int userId)
     {

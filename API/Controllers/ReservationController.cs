@@ -14,20 +14,6 @@ public class ReservationController : ControllerBase
     {
         _reservationService = reservationService;
     }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-    {
-        try
-        {
-            var reservation = await _reservationService.FindByIdAsync(id);
-            return Ok(reservation);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500);
-        }
-    }
     
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] ReservationDTO reservationDto)
@@ -62,20 +48,6 @@ public class ReservationController : ControllerBase
         catch (Exception)
         {
             return StatusCode(500, "An error occurred while processing your request.");
-        }
-    }
-    
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Put([FromBody] ReservationDTO reservationDto, int id)
-    {
-        try
-        {
-            await _reservationService.EditAsync(reservationDto, id);
-            return NoContent();
-        }
-        catch (Exception)
-        {
-            return StatusCode(500);
         }
     }
 }
