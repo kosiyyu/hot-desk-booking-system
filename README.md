@@ -36,3 +36,24 @@ Use the following credentials to access the admin panel:
 
 - **Email:** `admin@example.com`
 - **Password:** `12345678`
+
+Other users (non administrative users) need to be added manually via register option.
+
+## 4. Views
+**Important view and usage differs if we log in as user or as administrator**
+
+### Location (admin view)
+![alt text](images/admin-location.png)
+### Location (user view)
+![alt text](images/user-location.png)
+### Locations (admin view)
+![alt text](images/admin-locations.png)
+### Locations (user view)
+![alt text](images/user-locations.png)
+### Reservation info
+When hovering over a day in the calendar in the admin view, show information about the reservation owner. In the user view, no information will be displayed.
+
+## 5. Additional informations
+- Unfortunately, there are no unit tests implemented.
+- The "Forgot Password" option is currently just a placeholder.
+- Project could be done much better in many aspects; for example password could be hashed to protect user privacy but unfortunately i didn't have much time to do that
