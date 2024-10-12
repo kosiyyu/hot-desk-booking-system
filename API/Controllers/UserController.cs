@@ -52,6 +52,26 @@ public class UserController : ControllerBase
         }
     }
     
+    [HttpGet("reservation/{reservationId}")]
+    [Authorize]
+    [Admin]
+    public async Task<IActionResult> GetUserInfoByReservationId(int reservationId)
+    {
+        try
+        {
+            var userInfo = await _userService.GetUserInfoByReservationIdAsync(reservationId);
+            return Ok(userInfo);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Internal server error.");
+        }
+    }
+    
     private string ValidateUserDto(UserDTO userDto)
     {
         if (string.IsNullOrEmpty(userDto.Email) || !IsValidEmail(userDto.Email))

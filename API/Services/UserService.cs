@@ -20,6 +20,24 @@ public class UserService : IUserService
         _configuration = configuration;
     }
     
+    public async Task<UserDTO> GetUserInfoByReservationIdAsync(int reservationId)
+    {
+        var reservation = await _ctx.Reservations
+            .Include(r => r.User)
+            .FirstOrDefaultAsync(r => r.ReservationId == reservationId);
+
+        if (reservation == null)
+        {
+            throw new ArgumentException("Reservation not found");
+        }
+
+        return new UserDTO
+        {
+            Username = reservation.User.Username,
+            Email = reservation.User.Email
+        };
+    }
+    
     public async Task AddAsync(UserDTO userDto, bool isAdmin = false)
     {
         var user = new User()
