@@ -52,6 +52,7 @@ Other users (non administrative users) need to be added manually via register op
 ![alt text](images/user-locations.png)
 ### Reservation info
 When hovering over a day in the calendar in the admin view, show information about the reservation owner. In the user view, no information will be displayed.
+![alt text](images/image.png)
 
 ## 5. Additional informations
 - Unfortunately, there are no unit tests implemented.
